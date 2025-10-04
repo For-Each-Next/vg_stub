@@ -8,8 +8,7 @@ version = "0.0.1"
 description = "A tool generate wikitext for video-game stubs."
 authors = [{ name = "For Each ... Next", email = "for_each_next@outlook.com" }]
 license = { text = "MIT License" }
-classifiers = [
-    "Development Status :: 1 - Planning",
+classifiers = ["Development Status :: 1 - Planning",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
@@ -25,7 +24,12 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 requires-python = ">=3.14"
-dependencies = ['mwparserfromhell', 'pypinyin', 'pykakasi']
+dependencies = [
+    'mwparserfromhell',
+    'pypinyin',
+    'pykakasi',
+    'zhconv-rs'
+]
 
 [tool.ruff]
 line-length = 79
