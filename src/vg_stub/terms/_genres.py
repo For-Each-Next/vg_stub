@@ -6,7 +6,7 @@ __all__ = ("GenreTerm", "genres")
 
 from types import MappingProxyType
 
-from vg_stub.termologies._term import Term
+from vg_stub.terms._term import Term
 from vg_stub.utils import hant
 
 
