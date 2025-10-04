@@ -265,7 +265,7 @@ def wikilink(
     This function avoids redundant display text when the title and the
     link text are effectively the same. For example, it prevents outputs
     like `[[Apple|apple]]` or `[[東方不敗|东方不败]]`, as generating
-    `[[apple]]` and `[[东方不敗]]` directly. Automatic simplification
+    `[[apple]]` and `[[东方不败]]` directly. Automatic simplification
     can be disabled by setting `force` to True.
 
     Args:
