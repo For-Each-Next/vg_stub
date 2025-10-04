@@ -2,7 +2,7 @@
 
 __all__ = ("Term",)
 
-from mwparserfromhell.nodes import Wikilink
+from vg_stub.utils import wikilink
 
 
 class Term:
@@ -107,7 +107,7 @@ class Term:
         if self._linked:
             return display
         self._linked = True
-        return str(Wikilink(self.article, display))
+        return wikilink(self.article, display)
 
     def cat_link(self, sort: str | None = None) -> str | None:
         """Return the MediaWiki category string for the term.
@@ -130,7 +130,7 @@ class Term:
         """
         if self.cat is None:
             return None
-        return str(Wikilink(f"Category:{self.cat}", sort))
+        return wikilink(f"Category:{self.cat}", sort)
 
     def stub_tag(self) -> str | None:
         """Return the wikitext of the stub template for the term.
