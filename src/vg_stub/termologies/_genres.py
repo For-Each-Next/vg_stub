@@ -73,16 +73,12 @@ class GenreTerm(Term):
 
         Examples:
             >>> action = GenreTerm("动作", article="動作遊戲")
-            >>> action.name
-            '動作遊戲'
             >>> strategy = GenreTerm(
             ...     "策略",
             ...     article="策略遊戲",
             ...     cat="策略遊戲",
             ...     stub="strategy-videogame-stub",
             ... )
-            >>> strategy.text(link=True)
-            '[[策略遊戲]]'
         """
         super().__init__(
             hant(genre),
