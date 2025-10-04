@@ -1,6 +1,6 @@
 """Utilities for building MediaWiki-style link for terms."""
 
-from dataclasses import dataclass, field
+from dataclasses import KW_ONLY, dataclass, field
 
 __all__ = ("Term",)
 
@@ -28,9 +28,9 @@ class Term:
 
     Examples:
         >>> rpg = Term(
-        ...     code="rpg",
-        ...     modifier="角色扮演",
-        ...     head="遊戲",
+        ...     "rpg",
+        ...     "角色扮演",
+        ...     "遊戲",
         ...     article="電子角色扮演遊戲",
         ...     cat="電子角色扮演遊戲",
         ...     stub="rpg-videogame-stub",
@@ -54,6 +54,7 @@ class Term:
     code: str
     modifier: str
     head: str
+    _: KW_ONLY
     article: str | None = None
     cat: str | None = None
     stub: str | None = None
@@ -85,7 +86,12 @@ class Term:
             on arguments.
 
         Examples:
-            >>> t = Term("rpg", "角色扮演", "遊戲", "電子角色扮演遊戲")
+            >>> t = Term(
+            ...     "rpg",
+            ...     "角色扮演",
+            ...     "遊戲",
+            ...     article="電子角色扮演遊戲",
+            ... )
             >>> t.text(link=False)
             '角色扮演遊戲'
             >>> t.text(link=False, full=False)
