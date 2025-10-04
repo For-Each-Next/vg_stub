@@ -5,13 +5,16 @@ __all__ = (
     "comma_join",
     "hans",
     "hant",
+    "is_same_title",
     "semi_comma_join",
     "tuplize",
+    "wikilink",
 )
 
 from types import EllipsisType, MappingProxyType, NoneType
 from typing import TYPE_CHECKING, Any, Literal, overload
 
+from mwparserfromhell.nodes import Wikilink
 from zhconv_rs import zhconv
 
 if TYPE_CHECKING:
@@ -205,3 +208,82 @@ def hant(text: str) -> str:
         'Sony影業'
     """
     return zhconv(text, "zh-hant")
+
+
+def is_same_title(__text1: str, __text2: str, /) -> bool:
+    """Compare whether two texts represent the same title.
+
+    This is a quick checker for whether two strings refer to the same
+    Wikipedia article title.
+
+    It considers Wikipedia-style rules: underscores are treated as
+    spaces, and comparison is case-insensitive only for the first
+    character.
+
+    It also supports simplified/traditional Chinese conversion by
+    attempting to convert each character to simplified individually.
+    Regional variants are not considered.
+
+    Args:
+        __text1: The first text to compare.
+        __text2: The second text to compare.
+
+    Returns:
+        True if the titles are considered equivalent, False otherwise.
+
+    Examples:
+        >>> is_same_title("this is a pen", "This_is_a_pen")
+        True
+        >>> is_same_title("東方不敗", "东方不败")
+        True
+        >>> is_same_title("打印机", "列印機")
+        False
+    """
+
+    def normalize(text: str, /) -> str:
+        text = text.replace("_", " ").lstrip(": ").rstrip()
+        text = text[0].lower() + text[1:]
+        return hans(text)
+
+    return normalize(__text1) == normalize(__text2)
+
+
+def wikilink(
+    title: str,
+    text: str | None = None,
+    *,
+    force: bool = False,
+) -> str:
+    """Generate a string representing a Wikipedia link.
+
+    This function avoids redundant display text when the title and the
+    link text are effectively the same. For example, it prevents outputs
+    like `[[Apple|apple]]` or `[[東方不敗|东方不败]]`, as generating
+    `[[apple]]` and `[[东方不敗]]` directly. Automatic simplification
+    can be disabled by setting `force` to True.
+
+    Args:
+        title: The page title.
+        text: Optional display text for the link. If None, the title is
+            used with replacing underscores with spaces.
+        force: If True, use the given title and text directly without
+            any kind of simplification.
+
+    Returns:
+        A string representing the wikilink.
+
+    Examples:
+        >>> wikilink("how_are_you?")
+        '[[how are you?]]'
+        >>> wikilink("東方不敗", "东方不败")
+        '[[东方不败]]'
+        >>> wikilink("東方不敗", "东方不败", force=True)
+        '[[東方不敗|东方不败]]'
+    """
+    if force:
+        return str(Wikilink(title, text))
+    if text is None:
+        return str(Wikilink(title.replace("_", " ")))
+    if is_same_title(title, text):
+        return str(Wikilink(text))
+    return str(Wikilink(title, text))
