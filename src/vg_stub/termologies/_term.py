@@ -1,5 +1,7 @@
 """Utilities for building MediaWiki-style link for terms."""
 
+from __future__ import annotations
+
 __all__ = ("Term",)
 
 from vg_stub.utils import wikilink
