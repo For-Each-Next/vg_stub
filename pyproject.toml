@@ -1,16 +1,12 @@
 [build-system]
-requires = [
-    "hatchling >= 1.26",
-]
+requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"
 
 [project]
 name = "vg_stub"
 version = "0.0.1"
 description = "A tool generate wikitext for video-game stubs."
-authors = [
-    { name = "For Each ... Next", email = "for_each_next@outlook.com" },
-]
+authors = [{ name = "For Each ... Next", email = "for_each_next@outlook.com" }]
 license = { text = "MIT License" }
 classifiers = [
     "Development Status :: 1 - Planning",
@@ -29,7 +25,7 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = ['mwparserfromhell', 'pypinyin', 'pykakasi']
 
 [tool.ruff]
 line-length = 79
@@ -41,20 +37,12 @@ docstring-code-format = true
 docstring-code-line-length = 72
 
 [tool.ruff.lint]
-extend-select = [
-    "ALL",
-]
-ignore = [
-    "CPY001",
-]
+extend-select = ["ALL"]
+ignore = ["CPY001"]
 
 [tool.ruff.lint.extend-per-file-ignores]
-"scripts/*.py" = [
-    "INP001",
-]
-"tests/*.py" = [
-    "INP001",
-]
+"scripts/*.py" = ["INP001"]
+"tests/*.py" = ["INP001"]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
