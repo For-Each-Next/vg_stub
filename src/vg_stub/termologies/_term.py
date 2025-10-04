@@ -1,13 +1,10 @@
 """Utilities for building MediaWiki-style link for terms."""
 
-from dataclasses import KW_ONLY, dataclass, field
-
 __all__ = ("Term",)
 
 from mwparserfromhell.nodes import Wikilink
 
 
-@dataclass
 class Term:
     """Represents a term with MediaWiki formatting capabilities.
 
@@ -18,26 +15,17 @@ class Term:
     It tracks link usage to prevent overlinking (linking the same term
     multiple times).
 
-    Attributes:
-        code: Short identifier code for the term.
-        modifier: The modifying part of the term name.
-        head: The head (base) part of the term name.
-        article: Optional target article title for linking.
-        cat: Optional category name for categorization.
-        stub: Optional stub template name.
-
     Examples:
         >>> rpg = Term(
-        ...     "rpg",
         ...     "角色扮演",
         ...     "遊戲",
         ...     article="電子角色扮演遊戲",
         ...     cat="電子角色扮演遊戲",
         ...     stub="rpg-videogame-stub",
         ... )
-        >>> rpg.code
-        'rpg'
         >>> rpg.name
+        '角色扮演遊戲'
+        >>> rpg.text(link=False)
         '角色扮演遊戲'
         >>> rpg.text(link=True)  # First time calling with linking
         '[[電子角色扮演遊戲|角色扮演遊戲]]'
@@ -51,15 +39,30 @@ class Term:
         '{{rpg-videogame-stub}}'
     """
 
-    code: str
-    modifier: str
-    head: str
-    _: KW_ONLY
-    article: str | None = None
-    cat: str | None = None
-    stub: str | None = None
+    def __init__(
+        self,
+        modifier: str,
+        head: str,
+        *,
+        article: str | None = None,
+        cat: str | None = None,
+        stub: str | None = None,
+    ) -> None:
+        """Initialize the instance.
 
-    _has_been_linken: bool = field(default=False, init=False, repr=False)
+        Args:
+            modifier: The modifying part of the term name.
+            head: The head (base) part of the term name.
+            article: Optional target article title for linking.
+            cat: Optional category name for categorization.
+            stub: Optional stub template name.
+        """
+        self.modifier = modifier
+        self.head = head
+        self.article = article
+        self.cat = cat
+        self.stub = stub
+        self._linked = False
 
     @property
     def name(self) -> str:
@@ -86,12 +89,7 @@ class Term:
             on arguments.
 
         Examples:
-            >>> t = Term(
-            ...     "rpg",
-            ...     "角色扮演",
-            ...     "遊戲",
-            ...     article="電子角色扮演遊戲",
-            ... )
+            >>> t = Term("角色扮演", "遊戲", article="電子角色扮演遊戲")
             >>> t.text(link=False)
             '角色扮演遊戲'
             >>> t.text(link=False, full=False)
@@ -106,9 +104,9 @@ class Term:
             return display
         if self.article is None:
             return display
-        if self._has_been_linken:
+        if self._linked:
             return display
-        self._has_been_linken = True
+        self._linked = True
         return str(Wikilink(self.article, display))
 
     def cat_link(self, sort: str | None = None) -> str | None:
@@ -124,7 +122,7 @@ class Term:
             set.
 
         Examples:
-            >>> t = Term("rpg", "動作", "遊戲", cat="動作遊戲")
+            >>> t = Term("動作", "遊戲", cat="動作遊戲")
             >>> t.cat_link()
             '[[Category:動作遊戲]]'
             >>> t.cat_link(sort="*")
@@ -142,12 +140,7 @@ class Term:
             None if `stub_tag_name` is not set.
 
         Examples:
-            >>> t = Term(
-            ...     "rpg",
-            ...     "角色扮演",
-            ...     "遊戲",
-            ...     stub="rpg-videogame-stub",
-            ... )
+            >>> t = Term("角色扮演", "遊戲", stub="rpg-videogame-stub")
             >>> t.stub_tag()
             '{{rpg-videogame-stub}}'
         """
@@ -162,7 +155,7 @@ class Term:
             A string. Equivalent to accessing `self.name`.
 
         Example:
-            >>> str(Term("rpg", "角色扮演", "遊戲"))
+            >>> str(Term("角色扮演", "遊戲"))
             '角色扮演遊戲'
         """
         return self.name
