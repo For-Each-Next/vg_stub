@@ -12,12 +12,13 @@ ITALIC_LANGS = frozenset(("en",))
 
 
 class Name:
-    """Container for multilingual game title names.
+    """Represents game title in a certain language.
 
-    Provides language-aware transliteration, sort keys, and generation
-    of Wikipedia {{efn}} notes with nested {{langx}}. Currently supports
-    English, Chinese, and Japanese. English names are italicized when
-    formatted; Chinese names do not produce footnotes.
+    It with optional transliteration, sorting, and literal translation.
+
+    Mainly supports English, Chinese, and Japanese, with providing
+    language-specific transliterations, sortable keys, and a {{langx}}
+    template representation.
 
     Examples:
         >>> zh = Name("zh", "時空幻境")
@@ -28,8 +29,8 @@ class Name:
         >>> en = Name("en", "Tales of Phantasia", lit="幻想传奇")
         >>> en.sortkey
         'Tales Of Phantasia'
-        >>> en.efn
-        '{{efn|{{langx|en|Tales of Phantasia|lit=幻想传奇|italic=yes}}}}'
+        >>> en.langx
+        '{{langx|en|Tales of Phantasia|lit=幻想传奇|italic=yes}}'
         >>> ja = Name("ja", "テイルズ オブ ファンタジア")
         >>> ja.name
         'テイルズ オブ ファンタジア'
@@ -38,13 +39,15 @@ class Name:
         >>> ja.sortkey
         'Teiruzu Obu Fantajia'
         >>> ja2 = Name(
-        ...     "ja", "キミのいる未来へ", translit="Kimi no Iru Mirai e"
+        ...     "ja",
+        ...     "キミのいる未来へ",
+        ...     translit="Kimi no Iru Mirai e",
         ... )
         >>> ja2.sortkey
         'Kimi Noiru Mirai E'
-        >>> ja2.efn
-        '{{efn|{{langx|ja|キミのいる未来へ|translit=Kimi no Iru Mirai e}}}}'
-    """  # noqa: W505
+        >>> ja2.langx
+        '{{langx|ja|キミのいる未来へ|translit=Kimi no Iru Mirai e}}'
+    """
 
     def __init__(
         self,
@@ -54,18 +57,17 @@ class Name:
         sortkey: str | None = None,
         lit: str | None = None,
     ) -> None:
-        """Initialize a Name with language-aware processing.
+        """Initialize a Name object.
 
         Args:
-            lang: ISO 639-1 language code (e.g., 'en', 'zh', 'ja').
-            name: The name in its original script.
-            translit: Optional explicit transliteration. If None is
-                given, it is auto-generated for Chinese (Hanyu Pinyin)
-                and Japanese (modified Hepburn).
-            sortkey: Optional explicit sort key. If None, it is
-                auto-generated according to language-specific rules.
-            lit: Optional literal translation of the name, used for
-                Wikitext {{efn}} notes appended to the main name.
+            lang: ISO 639-1 language code ('en', 'zh', 'ja').
+            name: Original title in its native script.
+            translit: Optional explicit transliteration. If omitted,
+                an auto-generated value will be set.
+            sortkey: Optional explicit sorting key. If omitted, an
+                auto-generated value will be set.
+            lit: Optional literal translation for use in the {{langx}}
+                template.
         """
         self.lang = lang
         self.name = name
@@ -77,7 +79,8 @@ class Name:
         """Return the transliteration for this name.
 
         If a value is provided, it is returned unchanged. Otherwise, a
-        language-specific transliteration is generated:
+        language-specific transliteration (might not correct) will be
+        generated:
             - Chinese (zh): Hanyu Pinyin with tone marks.
             - Japanese (ja): Modified Hepburn romanization.
             - Other languages: The original name is returned.
@@ -100,10 +103,11 @@ class Name:
         """Return the sort key used for alphabetical ordering.
 
         If an explicit sort key is provided, it is returned unchanged.
-        Otherwise, a language-specific key is generated:
-        - Chinese (zh): Toneless Pinyin with each syllable capitalized.
-        - Japanese (ja): Title-cased romanization.
-        - Other languages: Title-cased transliteration.
+        Otherwise, a language-specific transliteration (might not
+        correct) will be generated:
+            - Chinese (zh): Toneless Pinyin, every syllable upper-cased.
+            - Japanese (ja): Title-cased romanization.
+            - Other languages: Title-cased transliteration.
 
         Args:
             value: Explicit sort key value, or None to auto-generate.
@@ -129,24 +133,19 @@ class Name:
         return self.lang in ITALIC_LANGS
 
     @property
-    def efn(self) -> str | None:
-        """Return a Wikipedia efn template embedding {{langx}}.
-
-        Generates the {{efn}} footnote containing a nested {{langx}}.
-        Returns None for Chinese names (no footnote is required).
+    def langx(self) -> str | None:
+        """Return corresponding {{langx}} template.
 
         Returns:
             The efn template string, or None if no footnote is needed.
         """
-        if self.lang == "zh":
-            return None
-        langx = mwparserfromhell.nodes.Template("langx")
-        langx.add(1, self.lang, showkey=False)
-        langx.add(2, self.name, showkey=False)
+        tl = mwparserfromhell.nodes.Template("langx")
+        tl.add(1, self.lang, showkey=False)
+        tl.add(2, self.name, showkey=False)
         if self.translit != self.name:
-            langx.add("translit", self.translit)
+            tl.add("translit", self.translit)
         if self.lit:
-            langx.add("lit", self.lit)
+            tl.add("lit", self.lit)
         if self.italic:
-            langx.add("italic", "yes")
-        return f"{{{{efn|{langx}}}}}"
+            tl.add("italic", "yes")
+        return str(tl)
