@@ -3,12 +3,16 @@
 __all__ = (
     "chinese_punctation_join",
     "comma_join",
+    "hans",
+    "hant",
     "semi_comma_join",
     "tuplize",
 )
 
 from types import EllipsisType, MappingProxyType, NoneType
 from typing import TYPE_CHECKING, Any, Literal, overload
+
+from zhconv_rs import zhconv
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -157,3 +161,47 @@ def comma_join(
         '话说那潘金莲，李瓶儿，庞春梅都是何许人也？'
     """  # noqa: RUF002
     return chinese_punctation_join(__strings, "comma", start, end)
+
+
+def hans(text: str) -> str:
+    """Convert Chinese text to Simplified Chinese.
+
+    This function performs character-level conversion to Simplified
+    Chinese. It does not handle regional word variations.
+    For example, it converts '印表機' to '印表机', but not to '打印机'.
+
+    Args:
+        text: The input string to convert.
+
+    Returns:
+        A string converted to Simplified Chinese characters.
+
+    Examples:
+        >>> hans("海內存知己 天涯若比鄰")
+        '海内存知己 天涯若比邻'
+        >>> hans("Sony影業")
+        'Sony影业'
+    """
+    return zhconv(text, "zh-hans")
+
+
+def hant(text: str) -> str:
+    """Convert Chinese text to Traditional Chinese.
+
+    This function performs character-level conversion to Traditional
+    Chinese. It does not handle regional word variations.
+    For example, it converts '打印机' to '打印機', but not to '印表機'.
+
+    Args:
+        text: The input string to convert.
+
+    Returns:
+        A string converted to Traditional Chinese characters.
+
+    Examples:
+        >>> hant("海内存知己 天涯若比邻")
+        '海內存知己 天涯若比鄰'
+        >>> hant("Sony影业")
+        'Sony影業'
+    """
+    return zhconv(text, "zh-hant")
