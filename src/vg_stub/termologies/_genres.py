@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__all__ = ("GenreTerm", "data")
+__all__ = ("GenreTerm", "genres")
 
 from types import MappingProxyType
 
@@ -89,7 +89,7 @@ class GenreTerm(Term):
         )
 
 
-data = MappingProxyType({
+genres = MappingProxyType({
     "rpg": GenreTerm(
         "角色扮演",
         article="電子角色扮演遊戲",
