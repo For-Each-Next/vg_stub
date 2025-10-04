@@ -5,85 +5,10 @@ from __future__ import annotations
 __all__ = ("Name",)
 
 import mwparserfromhell
-from pykakasi import kakasi
-from pypinyin import lazy_pinyin, pinyin
+
+from vg_stub.utils import pinyin, romaji
 
 ITALIC_LANGS = frozenset(("en",))
-
-
-def to_pinyin(text: str, *, tone: bool = True) -> str:
-    """Return Chinese Hanyu Pinyin with capitalization.
-
-    Converts Chinese text to Hanyu Pinyin. Syllables are capitalized and
-    separated by spaces. When tone is True, diacritics are included;
-    when False, toneless Pinyin is returned.
-
-    Args:
-        text: Chinese text in Simplified or Traditional characters.
-        tone: If True, include tone marks (for example, "Huàn");
-            if False, return toneless Pinyin (for example, "Huan").
-            Defaults to True.
-
-    Returns:
-        Pinyin string with capitalized, space-separated syllables.
-
-    Examples:
-        >>> to_pinyin("幻想传奇")
-        'Huàn Xiǎng Chuán Qí'
-        >>> to_pinyin("幻想传奇", tone=False)
-        'Huan Xiang Chuan Qi'
-    """
-    if tone:
-        return " ".join(py[0].capitalize() for py in pinyin(text))
-    return " ".join(p.capitalize() for p in lazy_pinyin(text))
-
-
-def to_romaji(text: str) -> str:
-    """Return modified Hepburn romanization with capitalization.
-
-    Converts Japanese text to romanized form using a modified Hepburn
-    scheme. Words are capitalized, while common particles keep their
-    conventional forms (e.g., he→e, ha→wa, wo→o; loanword "obu" stays
-    lowercase). Segmentation is best-effort and may be imperfect.
-
-    Args:
-        text: Japanese text (hiragana, katakana, and/or kanji).
-
-    Returns:
-        Romanized with appropriate capitalization.
-
-    Examples:
-        >>> to_romaji("幻想物語")
-        'Gensou Monogatari'
-        >>> to_romaji("テイルズ オブ ファンタジア")
-        'Teiruzu obu Fantajia'
-        >>> to_romaji("キミのいる未来へ")  # の is incorrectly segmented
-        'Kimi Noiru Mirai e'
-    """
-    # Particle mappings for proper romanization
-    modified_hepburn_mapping = {
-        "obu": "obu",  # オブ (of)
-        "he": "e",  # へ
-        "ga": "ga",  # が
-        "no": "no",  # の
-        "wo": "o",  # を
-        "to": "to",  # と
-        "ha": "wa",  # は
-    }
-
-    converter = kakasi()
-    words = converter.convert(text)
-    result_words = []
-    for word in words:
-        hepburn = word["hepburn"].strip()
-        if not hepburn:
-            continue
-        modified_hepburn = modified_hepburn_mapping.get(
-            hepburn,
-            hepburn.capitalize(),
-        )
-        result_words.append(modified_hepburn)
-    return " ".join(result_words)
 
 
 class Name:
@@ -112,12 +37,14 @@ class Name:
         'Teiruzu obu Fantajia'
         >>> ja.sortkey
         'Teiruzu Obu Fantajia'
-        >>> ja2 = Name("ja", "キミのいる未来へ", translit="Kimi no Iru Mirai e")
+        >>> ja2 = Name(
+        ...     "ja", "キミのいる未来へ", translit="Kimi no Iru Mirai e"
+        ... )
         >>> ja2.sortkey
         'Kimi Noiru Mirai E'
         >>> ja2.efn
         '{{efn|{{langx|ja|キミのいる未来へ|translit=Kimi no Iru Mirai e}}}}'
-    """  # noqa: E501, W505
+    """  # noqa: W505
 
     def __init__(
         self,
@@ -164,9 +91,9 @@ class Name:
         if value:
             return value
         if self.lang == "zh":
-            return to_pinyin(self.name)
+            return pinyin(self.name)
         if self.lang == "ja":
-            return to_romaji(self.name)
+            return romaji(self.name)
         return self.name
 
     def _sortkey(self, value: str | None) -> str:
@@ -187,9 +114,9 @@ class Name:
         if value:
             return value
         if self.lang == "zh":
-            return to_pinyin(self.name, tone=False)
+            return pinyin(self.name, tone=False)
         if self.lang == "ja":
-            return to_romaji(self.name).title()
+            return romaji(self.name).title()
         return self.translit.title()
 
     @property

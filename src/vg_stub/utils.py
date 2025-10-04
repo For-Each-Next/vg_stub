@@ -1,11 +1,15 @@
 """Utilities."""
 
+from __future__ import annotations
+
 __all__ = (
     "chinese_punctation_join",
     "comma_join",
     "hans",
     "hant",
     "is_same_title",
+    "pinyin",
+    "romaji",
     "semi_comma_join",
     "tuplize",
     "wikilink",
@@ -14,6 +18,8 @@ __all__ = (
 from types import EllipsisType, MappingProxyType, NoneType
 from typing import TYPE_CHECKING, Any, Literal, overload
 
+import pykakasi
+import pypinyin
 from mwparserfromhell.nodes import Wikilink
 from zhconv_rs import zhconv
 
@@ -287,3 +293,78 @@ def wikilink(
     if is_same_title(title, text):
         return str(Wikilink(text))
     return str(Wikilink(title, text))
+
+
+def pinyin(text: str, *, tone: bool = True) -> str:
+    """Return Chinese Hanyu Pinyin with capitalization.
+
+    Converts Chinese text to Hanyu Pinyin. Syllables are capitalized and
+    separated by spaces. When tone is True, diacritics are included;
+    when False, toneless Pinyin is returned.
+
+    Args:
+        text: Chinese text in Simplified or Traditional characters.
+        tone: If True, include tone marks (for example, "Huàn");
+            if False, return toneless Pinyin (for example, "Huan").
+            Defaults to True.
+
+    Returns:
+        Pinyin string with capitalized, space-separated syllables.
+
+    Examples:
+        >>> pinyin("幻想传奇")
+        'Huàn Xiǎng Chuán Qí'
+        >>> pinyin("幻想传奇", tone=False)
+        'Huan Xiang Chuan Qi'
+    """
+    if tone:
+        return " ".join(py[0].capitalize() for py in pypinyin.pinyin(text))
+    return " ".join(p.capitalize() for p in pypinyin.lazy_pinyin(text))
+
+
+def romaji(text: str) -> str:
+    """Return modified Hepburn romanization with capitalization.
+
+    Converts Japanese text to romanized form using a modified Hepburn
+    scheme. Words are capitalized, while common particles keep their
+    conventional forms (e.g., he→e, ha→wa, wo→o; loanword "obu" stays
+    lowercase). Segmentation is best-effort and may be imperfect.
+
+    Args:
+        text: Japanese text (hiragana, katakana, and/or kanji).
+
+    Returns:
+        Romanized with appropriate capitalization.
+
+    Examples:
+        >>> romaji("幻想物語")
+        'Gensou Monogatari'
+        >>> romaji("テイルズ オブ ファンタジア")
+        'Teiruzu obu Fantajia'
+        >>> romaji("キミのいる未来へ")  # の is incorrectly segmented
+        'Kimi Noiru Mirai e'
+    """
+    # Particle mappings for proper romanization
+    modified_hepburn_mapping = {
+        "obu": "obu",  # オブ (of)
+        "he": "e",  # へ
+        "ga": "ga",  # が
+        "no": "no",  # の
+        "wo": "o",  # を
+        "to": "to",  # と
+        "ha": "wa",  # は
+    }
+
+    converter = pykakasi.kakasi()
+    words = converter.convert(text)
+    result_words = []
+    for word in words:
+        hepburn = word["hepburn"].strip()
+        if not hepburn:
+            continue
+        modified_hepburn = modified_hepburn_mapping.get(
+            hepburn,
+            hepburn.capitalize(),
+        )
+        result_words.append(modified_hepburn)
+    return " ".join(result_words)
