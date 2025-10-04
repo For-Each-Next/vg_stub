@@ -34,7 +34,7 @@ show-fixes = true
 
 [tool.ruff.format]
 docstring-code-format = true
-docstring-code-line-length = 72
+docstring-code-line-length = 60
 
 [tool.ruff.lint]
 extend-select = ["ALL"]
