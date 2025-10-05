@@ -28,7 +28,8 @@ dependencies = [
     'mwparserfromhell',
     'pypinyin',
     'pykakasi',
-    'zhconv-rs'
+    'zhconv-rs',
+    'PySide6',
 ]
 
 [tool.ruff]
