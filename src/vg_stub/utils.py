@@ -76,31 +76,46 @@ def tuplize(obj):
 def chinese_punctation_join(
     items: Iterable[str],
     punct: Literal["period", "semicolon", "comma", "semi-comma"],
-    start: str | None = None,
-    end: str | None = None,
-) -> str | None:
-    """Join a series of strings by given Chinese punctuation.
+    start: str = "",
+    end: str = "",
+    empty: str = "",
+) -> str:
+    """Join a sequence of strings using given Chinese punctuation.
 
-    Arguments:
-        items: The strings to join.
-        punct: The punctuation to use, which can be
-            'period' for The Chinese juhao ('。'),
-            'semicolon' Chinese fenhao ('；'),
-            'comma' for Chinese douhao ('，'),
-            'semi-comma' for Chinese dunhao ('、').
-        start: The prefix of the text.
-        end: The suffix of the text.
+    Args:
+        items: An iterable of strings to join.
+        punct: The punctuation style to use, can be one of
+            'period': juhao (。),
+            'semicolon': fenhao (；),
+            'comma': douhao (，), and
+            'semi-comma': dunhao (、).
+        start: Optional prefix to prepend to the joined string.
+        end: Optional suffix to append to the joined string.
+        empty: Value to return if all items are falsy (including empty
+            strings). In this case, ``start`` and ``end`` are ignored.
+            Defaults to an empty string.
 
     Returns:
-        The joined text. If no Truly items, then return an empty string.
+        The joined string with the specified punctuation and optional
+        prefix/suffix. If no truly items are provided, returns the value
+        of ``empty``.
 
     Examples:
         >>> names = ["彼得", "保罗", "玛丽"]
         >>> chinese_punctation_join(names, "semi-comma")
         '彼得、保罗、玛丽'
-        >>> names.clear()
-        >>> chinese_punctation_join(names, "semi-comma")
+        >>> chinese_punctation_join(
+        ...     names, "semi-comma", start="We are：", end="！"
+        ... )
+        'We are：彼得、保罗、玛丽！'
+        >>> chinese_punctation_join([], "semi-comma")
         ''
+        >>> chinese_punctation_join([], "semi-comma", empty="没有人")
+        '没有人'
+        >>> chinese_punctation_join(
+        ...     [""], "semi-comma", start="我们是：", empty="没有人"
+        ... )
+        '没有人'
     """  # noqa: RUF002
     mapping = MappingProxyType({
         "period": "。",
@@ -108,12 +123,10 @@ def chinese_punctation_join(
         "comma": "，",  # noqa: RUF001
         "semi-comma": "、",
     })
-    if start is None:
-        start = ""
-    if end is None:
-        end = ""
     filtered_items = filter(None, items)
-    return f"{start}{mapping[punct].join(filtered_items)}{end}"
+    if joined_text := mapping[punct].join(filtered_items):
+        return f"{start}{joined_text}{end}"
+    return empty
 
 
 def semi_comma_join(
