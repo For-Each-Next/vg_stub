@@ -13,14 +13,12 @@ class YearTerm(Term):
     """Represents a year term with MediaWiki formatting.
 
     YearTerm extends the base Term class to specifically handle
-    year-related stuff.
-
-    Year terms are defined in strings with the '年' (or '年代') suffix.
+    year-related stuff. Year terms are defined in strings with the '年'
+    (or '年代') suffix.
 
     The class includes methods for generating MediaWiki-formatted links,
-    category tags, and stub templates. The names of article, category,
-    and stub tag should correspond to their actual page titles on the
-    Chinese Wikipedia.
+    and category tags. The names of article and category should
+    correspond to their actual page titles on the Chinese Wikipedia.
 
     Examples:
         >>> y1983 = YearTerm(
@@ -28,6 +26,8 @@ class YearTerm(Term):
         ...     article="1983年電子遊戲界",
         ...     cat="1983年电子游戏",
         ... )
+        >>> y1983.modifier
+        '1983年'
         >>> y1983.name
         '1983年遊戲'
         >>> y1983.text()
@@ -60,7 +60,7 @@ class YearTerm(Term):
 
         Args:
             year: The year with a suffix of '年' or '年代'. Special
-                staus can be used like '尚未發行', '中止製作', etc.
+                staus can be used like '尚未發行的', '中止製作的', etc.
                 Either Simplified or Traditional Chinese can be passed,
                 though it will be automatically converted to Traditional
                 Chinese.
@@ -72,9 +72,10 @@ class YearTerm(Term):
                 be generated.
 
         Examples:
-            >>> y1983 = YearTerm("1983", article="1983年电子游戏")
-            >>> future = YearTerm("尚未發行")
-            >>> cancaelled = YearTerm("製作中止")
+            >>> y83 = YearTerm("1983", article="1983年电子游戏")
+            >>> y80s = YearTerm("1980年代", article="1980年代电子游戏")
+            >>> future = YearTerm("尚未發行的")
+            >>> cancelled = YearTerm("製作中止的")
         """
         super().__init__(
             hant(year),
