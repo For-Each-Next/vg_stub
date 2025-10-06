@@ -4,6 +4,7 @@ from __future__ import annotations
 
 __all__ = ("Name",)
 
+
 import mwparserfromhell
 
 from vg_stub.utils import pinyin, romaji
@@ -12,11 +13,13 @@ ITALIC_LANGS = frozenset(("en",))
 
 
 class Name:
-    """Represents game title in a certain language.
+    """Represents a game title in a specific language.
 
-    It with optional transliteration, sorting, and literal translation.
+    Supports optional transliteration, sorting keys, and literal
+    translations. These can be generated automatically, though the
+    results may not always be fully accurate.
 
-    Mainly supports English, Chinese, and Japanese, with providing
+    Primarily supports English, Chinese, and Japanese, providing
     language-specific transliterations, sortable keys, and a {{langx}}
     template representation.
 
@@ -47,9 +50,9 @@ class Name:
         'Kimi Noiru Mirai E'
         >>> ja2.langx()
         '{{langx|ja|キミのいる未来へ|translit=Kimi no Iru Mirai e}}'
-        >>> ja2.langx(efn=True)
-        '{{efn|{{langx|ja|キミのいる未来へ|translit=Kimi no Iru Mirai e}}}}'
-    """  # noqa: W505
+        >>> ja2.efn(translit=False)
+        '{{efn|{{langx|ja|キミのいる未来へ}}}}'
+    """
 
     def __init__(
         self,
@@ -62,14 +65,14 @@ class Name:
         """Initialize a Name object.
 
         Args:
-            lang: ISO 639-1 language code ('en', 'zh', 'ja').
-            name: Original title in its native script.
-            translit: Optional explicit transliteration. If omitted,
-                an auto-generated value will be set.
-            sortkey: Optional explicit sorting key. If omitted, an
-                auto-generated value will be set.
-            lit: Optional literal translation for use in the {{langx}}
-                template.
+            lang: The ISO 639-1 language code ('en', 'zh', 'ja').
+            name: The original title in its native script.
+            translit: An optional explicit transliteration. If omitted,
+                an auto-generated value will be used.
+            sortkey: An optional explicit sorting key. If omitted, an
+                auto-generated value will be used.
+            lit: An optional literal translation for use in the
+                {{langx}} and {{efn}} template.
         """
         self.lang = lang
         self.name = name
@@ -81,17 +84,17 @@ class Name:
         """Return the transliteration for this name.
 
         If a value is provided, it is returned unchanged. Otherwise, a
-        language-specific transliteration (might not correct) will be
+        language-specific transliteration (might not be correct) will be
         generated:
             - Chinese (zh): Hanyu Pinyin with tone marks.
             - Japanese (ja): Modified Hepburn romanization.
             - Other languages: The original name is returned.
 
         Args:
-            value: Optional explicit-transliteration value.
+            value: An optional explicit transliteration value.
 
         Returns:
-            Transliterated version of the name.
+            The transliterated version of the name.
         """
         if value:
             return value
@@ -105,17 +108,17 @@ class Name:
         """Return the sort key used for alphabetical ordering.
 
         If an explicit sort key is provided, it is returned unchanged.
-        Otherwise, a language-specific transliteration (might not
-        correct) will be generated:
-            - Chinese (zh): Toneless Pinyin, every syllable upper-cased.
-            - Japanese (ja): Title-cased romanization.
+        Otherwise, a language-specific sort key (might not be correct)
+        will be generated:
+            - Chinese: Toneless Pinyin with every syllable title-cased.
+            - Japanese: Title-cased romanization.
             - Other languages: Title-cased transliteration.
 
         Args:
-            value: Explicit sort key value, or None to auto-generate.
+            value: An explicit sort key value, or None to auto-generate.
 
         Returns:
-            Normalized string suitable for alphabetical sorting.
+            A normalized string suitable for alphabetical sorting.
         """
         if value:
             return value
@@ -134,24 +137,56 @@ class Name:
         """
         return self.lang in ITALIC_LANGS
 
-    def langx(self, *, efn: bool = False) -> str | None:
-        """Return corresponding {{langx}} template.
+    def langx(
+        self,
+        *,
+        translit: bool = True,
+        lit: bool = True,
+        italic: bool = True,
+    ) -> str:
+        """Return the corresponding {{langx}} template.
+
+        Args:
+            translit: Whether to include the transliteration.
+            lit: Whether to include the literal translation.
+            italic: Whether to apply italics for languages that
+                italicize work titles.
 
         Returns:
-            The efn template string, or None if no footnote is needed.
+            The langx template string.
         """
         tl_langx = mwparserfromhell.nodes.Template("langx")
         tl_langx.add(1, self.lang, showkey=False)
         tl_langx.add(2, self.name, showkey=False)
-        if self.translit != self.name:
+        if translit and (self.translit != self.name):
             tl_langx.add("translit", self.translit)
-        if self.lit:
+        if lit and self.lit:
             tl_langx.add("lit", self.lit)
-        if self.italic:
+        if italic and self.italic:
             tl_langx.add("italic", "yes")
-
-        if efn:
-            tl_efn = mwparserfromhell.nodes.Template("efn")
-            tl_efn.add(1, tl_langx)
-            return str(tl_efn)
         return str(tl_langx)
+
+    def efn(
+        self,
+        *,
+        translit: bool = True,
+        lit: bool = True,
+        italic: bool = True,
+    ) -> str:
+        """Return the {{efn}} wrapping the {{langx}}.
+
+        Args:
+            translit: Whether to include the transliteration in the
+                langx template.
+            lit: Whether to include the literal translation in the
+                langx template.
+            italic: Whether to apply italics for languages that
+                italicize work titles.
+
+        Returns:
+            The efn template string containing the langx template.
+        """
+        tl_lang = self.langx(translit=translit, lit=lit, italic=italic)
+        tl_efn = mwparserfromhell.nodes.Template("efn")
+        tl_efn.add(1, tl_lang)
+        return str(tl_efn)
