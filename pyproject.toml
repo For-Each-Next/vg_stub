@@ -25,11 +25,14 @@ classifiers = ["Development Status :: 1 - Planning",
 ]
 requires-python = ">=3.14"
 dependencies = [
-    'mwparserfromhell',
-    'pypinyin',
-    'pykakasi',
-    'zhconv-rs',
+    'bs4',
     'PySide6',
+    'mwparserfromhell',
+    'pykakasi',
+    'pypinyin',
+    'requests',
+    'zhconv-rs',
+    'python-dateutil',
 ]
 
 [tool.ruff]
