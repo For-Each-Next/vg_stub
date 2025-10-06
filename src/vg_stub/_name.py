@@ -29,7 +29,7 @@ class Name:
         >>> en = Name("en", "Tales of Phantasia", lit="幻想传奇")
         >>> en.sortkey
         'Tales Of Phantasia'
-        >>> en.langx
+        >>> en.langx()
         '{{langx|en|Tales of Phantasia|lit=幻想传奇|italic=yes}}'
         >>> ja = Name("ja", "テイルズ オブ ファンタジア")
         >>> ja.name
@@ -45,9 +45,11 @@ class Name:
         ... )
         >>> ja2.sortkey
         'Kimi Noiru Mirai E'
-        >>> ja2.langx
+        >>> ja2.langx()
         '{{langx|ja|キミのいる未来へ|translit=Kimi no Iru Mirai e}}'
-    """
+        >>> ja2.langx(efn=True)
+        '{{efn|{{langx|ja|キミのいる未来へ|translit=Kimi no Iru Mirai e}}}}'
+    """  # noqa: W505
 
     def __init__(
         self,
@@ -132,20 +134,24 @@ class Name:
         """
         return self.lang in ITALIC_LANGS
 
-    @property
-    def langx(self) -> str | None:
+    def langx(self, *, efn: bool = False) -> str | None:
         """Return corresponding {{langx}} template.
 
         Returns:
             The efn template string, or None if no footnote is needed.
         """
-        tl = mwparserfromhell.nodes.Template("langx")
-        tl.add(1, self.lang, showkey=False)
-        tl.add(2, self.name, showkey=False)
+        tl_langx = mwparserfromhell.nodes.Template("langx")
+        tl_langx.add(1, self.lang, showkey=False)
+        tl_langx.add(2, self.name, showkey=False)
         if self.translit != self.name:
-            tl.add("translit", self.translit)
+            tl_langx.add("translit", self.translit)
         if self.lit:
-            tl.add("lit", self.lit)
+            tl_langx.add("lit", self.lit)
         if self.italic:
-            tl.add("italic", "yes")
-        return str(tl)
+            tl_langx.add("italic", "yes")
+
+        if efn:
+            tl_efn = mwparserfromhell.nodes.Template("efn")
+            tl_efn.add(1, tl_langx)
+            return str(tl_efn)
+        return str(tl_langx)
