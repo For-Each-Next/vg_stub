@@ -5,15 +5,15 @@ from __future__ import annotations
 __all__ = ("YearTerm", "years")
 
 
-from vg_stub._terms._term import Term
-from vg_stub._utils import hant
+from vg_stub.terms._term import Term
+from vg_stub.utils import hant
 
 
 class YearTerm(Term):
     """Represents a year term with MediaWiki formatting.
 
     YearTerm extends the base Term class to specifically handle
-    year-related stuff. Year _terms are defined in strings with the '年'
+    year-related stuff. Year terms are defined in strings with the '年'
     (or '年代') suffix.
 
     The class includes methods for generating MediaWiki-formatted links,

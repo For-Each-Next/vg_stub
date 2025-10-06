@@ -6,7 +6,7 @@ __all__ = ("Name",)
 
 import mwparserfromhell
 
-from vg_stub._utils import pinyin, romaji
+from vg_stub.utils import pinyin, romaji
 
 ITALIC_LANGS = frozenset(("en",))
 

@@ -1,10 +1,10 @@
-"""Utilities for building MediaWiki-style link for _terms."""
+"""Utilities for building MediaWiki-style link for terms."""
 
 from __future__ import annotations
 
 __all__ = ("Term",)
 
-from vg_stub._utils import wikilink
+from vg_stub.utils import wikilink
 
 
 class Term:
