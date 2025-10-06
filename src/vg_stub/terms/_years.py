@@ -5,8 +5,8 @@ from __future__ import annotations
 __all__ = ("YearTerm", "years")
 
 
+from vg_stub._utils import hant
 from vg_stub.terms._term import Term
-from vg_stub.utils import hant
 
 
 class YearTerm(Term):

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 __all__ = ("Term",)
 
-from vg_stub.utils import wikilink
+from vg_stub._utils import wikilink
 
 
 class Term:
