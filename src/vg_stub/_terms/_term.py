@@ -1,4 +1,4 @@
-"""Utilities for building MediaWiki-style link for terms."""
+"""Utilities for building MediaWiki-style link for _terms."""
 
 from __future__ import annotations
 
